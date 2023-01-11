@@ -12,20 +12,32 @@ public class Player : MonoBehaviour
     private bool isGrounded = true;
     private bool isJumping = false;
     private bool isAttack = false;
-   
+    private bool isDead = false;
+
     private float horizontal;
     private float vertical;
     private string currentAnimName;
+    private Vector3 savePoint;
    
     void Start()
     {
-        
+        savePoint = transform.position;
+        OnInit();
     }
-
+    private void OnInit()
+    {
+        isDead = false;
+        isAttack = false;
+        transform.position = savePoint;
+        ChangeAnim("idle");
+    }
     // Update is called once per frame
     void FixedUpdate()
     {
-        Debug.Log(CheckGround());
+        if (isDead)
+        {
+            return;
+        }
         isGrounded = CheckGround();
         horizontal = Input.GetAxisRaw("Horizontal");
         //vertical = Input.GetAxisRaw
@@ -36,23 +48,24 @@ public class Player : MonoBehaviour
         }
         if (isGrounded)
         {
-            if (isJumping)
-            {
-                return;
-            }
             if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
             {
                 Jump();
             }
+            if (isJumping)
+            {
+                return;
+            }
+            
             if (Mathf.Abs(horizontal) > 0.1f)
             {
                 ChangeAnim("run");
             }
-            if (Input.GetKeyDown(KeyCode.C) && isGrounded)
-            {
+            if (Input.GetKeyDown(KeyCode.C))
+            {             
                 Attack();
             }
-            if (Input.GetKeyDown(KeyCode.V) && isGrounded)
+            if (Input.GetKeyDown(KeyCode.V))
             {
                 Throw();
             }
@@ -80,19 +93,19 @@ public class Player : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 1.1f, groundLayer);
         return hit.collider != null;
     }
-    void Attack()
+    private void Attack()
     {
         ChangeAnim("attack");
         isAttack = true;
         Invoke(nameof(ResetAttack), 0.5f);
     }
-    void Jump()
+    private void Jump()
     {
         isJumping = true;
         ChangeAnim("jump");
         rb.AddForce(jumpForce * Vector2.up);
     }
-    void Throw()
+    private void Throw()
     {
         ChangeAnim("throw");
         isAttack = true;
@@ -110,6 +123,20 @@ public class Player : MonoBehaviour
             anim.ResetTrigger(animName);
             currentAnimName = animName;
             anim.SetTrigger(currentAnimName);
+        }
+    }
+  
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.tag == "Coin")
+        {
+
+        }
+        if (collision.tag == "DeathZone")
+        {
+            isDead = true;
+            ChangeAnim("dead");
+            Invoke(nameof(OnInit), 1f);
         }
     }
 }
