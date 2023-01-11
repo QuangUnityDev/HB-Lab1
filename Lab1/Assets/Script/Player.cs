@@ -7,10 +7,11 @@ public class Player : MonoBehaviour
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float speed;
+    [SerializeField] private float jumpForce;
     [SerializeField] private Animator anim;
-    private bool isGround;
-    private bool isJumping;
-    private bool isAttack;
+    private bool isGrounded = true;
+    private bool isJumping = false;
+    private bool isAttack = false;
    
     private float horizontal;
     private float vertical;
@@ -25,17 +26,51 @@ public class Player : MonoBehaviour
     void FixedUpdate()
     {
         Debug.Log(CheckGround());
-        isGround = CheckGround();
+        isGrounded = CheckGround();
         horizontal = Input.GetAxisRaw("Horizontal");
         //vertical = Input.GetAxisRaw
-        if (Mathf.Abs(horizontal) > 0.1f )
+        if (isAttack)
         {
-            ChangeAnim("Run");
-            rb.velocity = new Vector2(horizontal * Time.deltaTime * speed, rb.velocity.y);
+            rb.velocity = Vector2.zero;
+            return;
         }
-        else if(isGround)
+        if (isGrounded)
         {
-            ChangeAnim("Idle");
+            if (isJumping)
+            {
+                return;
+            }
+            if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+            {
+                Jump();
+            }
+            if (Mathf.Abs(horizontal) > 0.1f)
+            {
+                ChangeAnim("run");
+            }
+            if (Input.GetKeyDown(KeyCode.C) && isGrounded)
+            {
+                Attack();
+            }
+            if (Input.GetKeyDown(KeyCode.V) && isGrounded)
+            {
+                Throw();
+            }
+        }
+        if (!isGrounded && rb.velocity.y < 0)
+        {
+            ChangeAnim("fall");
+            isJumping = false;
+        }
+        //Moving
+        if (Mathf.Abs(horizontal) > 0.1f)
+        {
+            rb.velocity = new Vector2(horizontal * Time.fixedDeltaTime * speed, rb.velocity.y);
+            transform.rotation = Quaternion.Euler(new Vector3(0, horizontal > 0 ? 0 : 180, 0));
+        }
+        else if (isGrounded)
+        {
+            ChangeAnim("idle");
             rb.velocity = Vector2.zero;
         }
     }
@@ -47,15 +82,26 @@ public class Player : MonoBehaviour
     }
     void Attack()
     {
-
+        ChangeAnim("attack");
+        isAttack = true;
+        Invoke(nameof(ResetAttack), 0.5f);
     }
     void Jump()
     {
-
+        isJumping = true;
+        ChangeAnim("jump");
+        rb.AddForce(jumpForce * Vector2.up);
     }
     void Throw()
     {
-
+        ChangeAnim("throw");
+        isAttack = true;
+        Invoke(nameof(ResetAttack), 0.5f);
+    }
+    private void ResetAttack()
+    {
+        ChangeAnim("idle");
+        isAttack = false;
     }
     private void ChangeAnim(string animName)
     {

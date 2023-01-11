@@ -548,7 +548,8 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
-  speed: 200
+  speed: 250
+  jumpForce: 350
   anim: {fileID: 546221371}
 --- !u!70 &1866861607
 CapsuleCollider2D:
