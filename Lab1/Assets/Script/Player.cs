@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : Charector
+
 {
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private LayerMask groundLayer;
@@ -18,19 +19,14 @@ public class Player : MonoBehaviour
     private float vertical;
     private string currentAnimName;
     private Vector3 savePoint;
+    private int coin;
    
     void Start()
     {
-        savePoint = transform.position;
+        SavePoint(); 
         OnInit();
     }
-    private void OnInit()
-    {
-        isDead = false;
-        isAttack = false;
-        transform.position = savePoint;
-        ChangeAnim("idle");
-    }
+    
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -48,15 +44,14 @@ public class Player : MonoBehaviour
         }
         if (isGrounded)
         {
-            if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-            {
-                Jump();
-            }
             if (isJumping)
             {
                 return;
             }
-            
+            if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+            {
+                Jump();
+            }
             if (Mathf.Abs(horizontal) > 0.1f)
             {
                 ChangeAnim("run");
@@ -70,6 +65,11 @@ public class Player : MonoBehaviour
                 Throw();
             }
         }
+        //if (!isGrounded && rb.velocity.y > 0)
+        //{
+        //    ChangeAnim("jump");
+        //    isJumping = true;
+        //}
         if (!isGrounded && rb.velocity.y < 0)
         {
             ChangeAnim("fall");
@@ -84,7 +84,7 @@ public class Player : MonoBehaviour
         else if (isGrounded)
         {
             ChangeAnim("idle");
-            rb.velocity = Vector2.zero;
+            rb.velocity = Vector2.up * rb.velocity.y ;
         }
     }
     private bool CheckGround()
@@ -92,6 +92,22 @@ public class Player : MonoBehaviour
         Debug.DrawLine(transform.position, transform.position + Vector3.down * 1.1f,Color.red);
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 1.1f, groundLayer);
         return hit.collider != null;
+    }
+    public override void OnInit()
+    {
+        base.OnInit();
+        isDead = false;
+        isAttack = false;
+        transform.position = savePoint;
+        ChangeAnim("idle");
+    }
+    public override void OnDespawn()
+    {
+        base.OnDespawn();
+    }
+    protected override void OnDeath()
+    {
+        base.OnDeath();
     }
     private void Attack()
     {
@@ -103,7 +119,7 @@ public class Player : MonoBehaviour
     {
         isJumping = true;
         ChangeAnim("jump");
-        rb.AddForce(jumpForce * Vector2.up);
+        rb.AddForce(jumpForce * Vector2.up);        
     }
     private void Throw()
     {
@@ -116,21 +132,17 @@ public class Player : MonoBehaviour
         ChangeAnim("idle");
         isAttack = false;
     }
-    private void ChangeAnim(string animName)
+
+    internal void SavePoint()
     {
-        if(currentAnimName != animName)
-        {
-            anim.ResetTrigger(animName);
-            currentAnimName = animName;
-            anim.SetTrigger(currentAnimName);
-        }
+        savePoint = transform.position;
     }
-  
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.tag == "Coin")
         {
-
+            coin++;
+            Destroy(collision.gameObject);
         }
         if (collision.tag == "DeathZone")
         {
