@@ -25,9 +25,9 @@ public class Player : Charector
 
     
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
-        if (isDead)
+        if (IsDead)
         {
             return;
         }
@@ -75,7 +75,7 @@ public class Player : Charector
         //Moving
         if (Mathf.Abs(horizontal) > 0.1f)
         {
-            rb.velocity = new Vector2(horizontal * Time.fixedDeltaTime * speed, rb.velocity.y);
+            rb.velocity = new Vector2(horizontal * Time.deltaTime * speed, rb.velocity.y);
             transform.rotation = Quaternion.Euler(new Vector3(0, horizontal > 0 ? 0 : 180, 0));
         }
         else if (isGrounded && isAttack == false && !isJumping)

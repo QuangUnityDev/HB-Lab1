@@ -13,7 +13,7 @@ public class AttackState : IState
             enemy.ChangeDirection(enemy.Target.transform.position.x > enemy.transform.position.x);
             enemy.StopMoving();
             enemy.Attack();
-        }
+        }     
         timer = 0;
     }
 

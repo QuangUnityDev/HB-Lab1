@@ -33,7 +33,7 @@ public class Enemy : Charector
 
     private void Update()
     {
-        if (currentState != null)
+        if (currentState != null && !IsDead)
         {
             currentState.OnExcute(this);
         }

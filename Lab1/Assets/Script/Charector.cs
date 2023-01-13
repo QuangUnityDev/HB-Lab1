@@ -7,7 +7,7 @@ public class Charector : MonoBehaviour
     [SerializeField] private Animator anim;
     private float hp;
     private string currentAnimName;
-    private bool IsDead => hp <= 0;
+    protected bool IsDead => hp <= 0;
     void Start()
     {
         OnInit();
