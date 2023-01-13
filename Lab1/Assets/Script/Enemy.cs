@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,8 +7,30 @@ public class Enemy : Charector
 {
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private float attackRange;
-    [SerializeField]private float moveSpeed;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private GameObject attackArea;
     private bool isRight = true;
+    private IState currentState;
+    private Charector target;
+    public Charector Target => target;
+
+    internal void SetTarget(Charector charector)
+    {
+        this.target = charector;
+        if (IsTargetInRange())
+        {
+            ChangState(new AttackState());
+        }
+        else if (Target != null)
+        {
+            ChangState(new PatrolState());
+        }
+        else
+        {
+            ChangState(new IdleState());
+        }
+    }
+
     private void Update()
     {
         if (currentState != null)
@@ -19,17 +42,19 @@ public class Enemy : Charector
     {
         base.OnInit();
         ChangState(new IdleState());
+        DeActiceAttack();
     }
     protected override void OnDeath()
     {
         base.OnDeath();
-        ChangState(new IdleState());
+        ChangState(null);
     }
     public override void OnDespawn()
     {
         base.OnDespawn();
+        Destroy(gameObject);
     }
-    private IState currentState;
+    
     public void ChangState(IState newState)
     {
         if (currentState != null)
@@ -44,7 +69,9 @@ public class Enemy : Charector
     }
     public void Attack()
     {
-
+        ChangeAnim("attack");
+        ActiveAttack();
+        Invoke(nameof(DeActiceAttack), 0.5f);
     }
     public void Moving()
     {
@@ -56,9 +83,25 @@ public class Enemy : Charector
         ChangeAnim("idle");
         rb.velocity = Vector2.zero;
     }
-    public bool TargetInRange()
+    public bool IsTargetInRange()
     {
-        return false;
+        if(target != null && Vector2.Distance(target.transform.position, transform.position) <= attackRange)
+        {
+            return true;
+        }
+        else
+        {
+            return false;   
+        }
+        
+    }
+    private void ActiveAttack()
+    {
+        attackArea.SetActive(true);
+    }
+    private void DeActiceAttack()
+    {
+        attackArea.SetActive(false);
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -67,7 +110,7 @@ public class Enemy : Charector
             ChangeDirection(!isRight);
         }
     }
-    private void ChangeDirection(bool isRight)
+    public void ChangeDirection(bool isRight)
     {
         this.isRight = isRight;
         transform.rotation = isRight ? Quaternion.Euler(Vector3.zero) : Quaternion.Euler(Vector3.up * 180);

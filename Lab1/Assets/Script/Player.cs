@@ -9,23 +9,20 @@ public class Player : Charector
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private float speed;
     [SerializeField] private float jumpForce;
-    [SerializeField] private Animator anim;
+    [SerializeField] private Kunai kunaiPrefab;
+    [SerializeField] private Transform throwPoint;
+    [SerializeField] private GameObject attackArea;
     private bool isGrounded = true;
     private bool isJumping = false;
     private bool isAttack = false;
     private bool isDead = false;
 
     private float horizontal;
-    private float vertical;
-    private string currentAnimName;
+    //private float vertical;
+    //private string currentAnimName;
     private Vector3 savePoint;
-    private int coin;
-   
-    void Start()
-    {
-        SavePoint(); 
-        OnInit();
-    }
+    private int coin = 0;
+
     
     // Update is called once per frame
     void FixedUpdate()
@@ -81,7 +78,7 @@ public class Player : Charector
             rb.velocity = new Vector2(horizontal * Time.fixedDeltaTime * speed, rb.velocity.y);
             transform.rotation = Quaternion.Euler(new Vector3(0, horizontal > 0 ? 0 : 180, 0));
         }
-        else if (isGrounded)
+        else if (isGrounded && isAttack == false && !isJumping)
         {
             ChangeAnim("idle");
             rb.velocity = Vector2.up * rb.velocity.y ;
@@ -99,7 +96,9 @@ public class Player : Charector
         isDead = false;
         isAttack = false;
         transform.position = savePoint;
+        DeActiceAttack();
         ChangeAnim("idle");
+        SavePoint();
     }
     public override void OnDespawn()
     {
@@ -108,12 +107,15 @@ public class Player : Charector
     protected override void OnDeath()
     {
         base.OnDeath();
+        OnInit();
     }
     private void Attack()
     {
         ChangeAnim("attack");
         isAttack = true;
         Invoke(nameof(ResetAttack), 0.5f);
+        ActiveAttack();
+        Invoke(nameof(DeActiceAttack), 0.5f);
     }
     private void Jump()
     {
@@ -126,6 +128,7 @@ public class Player : Charector
         ChangeAnim("throw");
         isAttack = true;
         Invoke(nameof(ResetAttack), 0.5f);
+        Instantiate(kunaiPrefab, throwPoint.position, throwPoint.rotation);
     }
     private void ResetAttack()
     {
@@ -136,6 +139,14 @@ public class Player : Charector
     internal void SavePoint()
     {
         savePoint = transform.position;
+    }
+    private void ActiveAttack()
+    {
+        attackArea.SetActive(true);
+    }
+    private void DeActiceAttack()
+    {
+        attackArea.SetActive(false);
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
