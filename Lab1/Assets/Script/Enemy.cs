@@ -52,6 +52,7 @@ public class Enemy : Charector
     public override void OnDespawn()
     {
         base.OnDespawn();
+        Destroy(heathBar.gameObject);
         Destroy(gameObject);
     }
     

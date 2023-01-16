@@ -5,6 +5,8 @@ using UnityEngine;
 public class Charector : MonoBehaviour
 {
     [SerializeField] private Animator anim;
+    [SerializeField] protected HeathBar heathBar;
+    [SerializeField] protected CombatText combatTextPrefab;
     private float hp;
     private string currentAnimName;
     protected bool IsDead => hp <= 0;
@@ -20,6 +22,7 @@ public class Charector : MonoBehaviour
     }
     public virtual void OnInit()
     {
+        heathBar.OnInit(100, transform);
         hp = 100;
     }
     public virtual void OnDespawn()
@@ -49,7 +52,10 @@ public class Charector : MonoBehaviour
             if(hp < damage)
             {
                 OnDeath();
+                //hp = 0;
             }
+            heathBar.SetNewHp(hp);
+            Instantiate(combatTextPrefab, transform.position + Vector3.up, Quaternion.identity).OnInit(damage);
         }
     }
 }
