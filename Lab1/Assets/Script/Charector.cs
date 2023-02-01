@@ -14,8 +14,6 @@ public class Charector : MonoBehaviour
     {
         OnInit();
     }
-
-    // Update is called once per frame
     void Update()
     {
         
@@ -38,7 +36,8 @@ public class Charector : MonoBehaviour
     {
         if (currentAnimName != animName)
         {
-            anim.ResetTrigger(animName);
+            //Debug.LogError(animName);
+            anim.ResetTrigger(currentAnimName);
             currentAnimName = animName;
             anim.SetTrigger(currentAnimName);
         }

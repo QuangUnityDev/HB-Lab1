@@ -58,6 +58,7 @@ public class Enemy : Charector
     
     public void ChangState(IState newState)
     {
+        Debug.Log(newState);
         if (currentState != null)
         {
             currentState.OnExit(this);
@@ -86,15 +87,7 @@ public class Enemy : Charector
     }
     public bool IsTargetInRange()
     {
-        if(target != null && Vector2.Distance(target.transform.position, transform.position) <= attackRange)
-        {
-            return true;
-        }
-        else
-        {
-            return false;   
-        }
-        
+        return (target != null && Vector2.Distance(target.transform.position, transform.position) <= attackRange);
     }
     private void ActiveAttack()
     {

@@ -123,9 +123,12 @@ public class Player : Charector
     }
     public void Jump()
     {
-        isJumping = true;
-        ChangeAnim("jump");
-        rb.AddForce(jumpForce * Vector2.up);        
+        if (CheckGround())
+        {
+            isJumping = true;
+            ChangeAnim("jump");
+            rb.AddForce(jumpForce * Vector2.up);
+        }          
     }
     public void Throw()
     {
