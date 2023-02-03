@@ -222,4 +222,17 @@ public class Player : Charector
         }
         //Debug.Log(isRope);
     }
+    [SerializeField] private GameObject Shield;
+    public bool isShield = false;
+    public void ShieldOnPlayer()
+    {
+        isShield = true;
+        Shield.gameObject.SetActive(true);
+        Invoke(nameof(ShieldOffPlayer), 5f);
+    }
+    private void ShieldOffPlayer()
+    {
+        Shield.gameObject.SetActive(false);
+        isShield = false;
+    }
 }
