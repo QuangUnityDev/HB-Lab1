@@ -58,7 +58,7 @@ public class Enemy : Charector
     
     public void ChangState(IState newState)
     {
-        Debug.Log(newState);
+        //Debug.Log(newState);
         if (currentState != null)
         {
             currentState.OnExit(this);

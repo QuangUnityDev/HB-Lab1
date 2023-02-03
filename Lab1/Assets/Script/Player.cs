@@ -12,16 +12,18 @@ public class Player : Charector
     [SerializeField] private Kunai kunaiPrefab;
     [SerializeField] private Transform throwPoint;
     [SerializeField] private GameObject attackArea;
+    [SerializeField] private float speedRope;
     private bool isGrounded = true;
     private bool isJumping = false;
     private bool isAttack = false;
     //private bool isDead = false;
-
+    private bool isRope = false;
     private float horizontal;
     //private float vertical;
     //private string currentAnimName;
     private Vector3 savePoint;
     private int coin = 0;
+    
 
     private void Awake()
     {
@@ -29,6 +31,7 @@ public class Player : Charector
     }
     void Update()
     {
+        //Debug.Log(CheckGround());
         if (IsDead)
         {
             return;
@@ -47,10 +50,10 @@ public class Player : Charector
             {
                 return;
             }
-            if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-            {
-                Jump();
-            }
+            //if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+            //{
+            //    Jump();
+            //}
             if (Mathf.Abs(horizontal) > 0.1f)
             {
                 ChangeAnim("run");
@@ -64,12 +67,16 @@ public class Player : Charector
                 Throw();
             }
         }
-        if (!isGrounded && rb.velocity.y > 0)
+        //if (isRope)
+        //{
+        //    UpRope();
+        //}
+        if (!isGrounded && rb.velocity.y > 0 && isRope == false)
         {
             ChangeAnim("jump");
             isJumping = true;
         }
-        if (!isGrounded && rb.velocity.y < 0)
+        if (!isGrounded && rb.velocity.y < 0 && isRope == false)
         {
             ChangeAnim("fall");
             isJumping = false;
@@ -85,6 +92,7 @@ public class Player : Charector
             ChangeAnim("idle");
             rb.velocity = Vector2.up * rb.velocity.y ;
         }
+        
         UIManager.instance.SetCoin(coin);
     }
     private bool CheckGround()
@@ -113,25 +121,51 @@ public class Player : Charector
         base.OnDeath();
         OnInit();
     }
+    private bool isConditionAttack()
+    {
+        return isJumping == true || isGrounded == false || isAttack == true;
+    }
     public void Attack()
     {
+        if (isConditionAttack())
+        {
+            return;
+        }
         ChangeAnim("attack");
         isAttack = true;
-        Invoke(nameof(ResetAttack), 0.5f);
         ActiveAttack();
+        Invoke(nameof(ResetAttack), 0.5f);        
         Invoke(nameof(DeActiceAttack), 0.5f);
+    }
+    public void UpRope()
+    {
+        
+        float vertical = Input.GetAxis("Vertical");
+        transform.Translate(Vector3.up * speedRope * Time.deltaTime);
+        //rb.velocity = new Vector2(rb.velocity.x, vertical * speedRope * Time.deltaTime);
+        //Debug.Log(isRope);
     }
     public void Jump()
     {
-        if (CheckGround())
+        if (CheckGround() && isRope == false && isJumping == false)
         {
             isJumping = true;
             ChangeAnim("jump");
             rb.AddForce(jumpForce * Vector2.up);
-        }          
+        }
+        if (isRope)
+        {
+            rb.gravityScale = 0;
+            UpRope();
+        }       
     }
+    
     public void Throw()
-    {
+    {        
+        if(isConditionAttack())
+        {
+            return;
+        }
         ChangeAnim("throw");
         isAttack = true;
         Invoke(nameof(ResetAttack), 0.5f);
@@ -172,5 +206,20 @@ public class Player : Charector
             ChangeAnim("dead");
             Invoke(nameof(OnInit), 1f);
         }
+        if (collision.gameObject.CompareTag("Rope"))
+        {
+            transform.SetParent(collision.gameObject.transform);
+            isRope = true;
+        }
+    }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Rope"))
+        {
+            transform.gameObject.transform.SetParent(null);
+            isRope = false;
+            rb.gravityScale = 1;
+        }
+        //Debug.Log(isRope);
     }
 }
