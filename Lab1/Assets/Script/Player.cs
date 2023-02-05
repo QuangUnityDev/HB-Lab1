@@ -31,6 +31,7 @@ public class Player : Charector
     }
     void Update()
     {
+        heathBar.SetNewHp(base.hp);
         //Debug.Log(CheckGround());
         if (IsDead)
         {
@@ -50,9 +51,12 @@ public class Player : Charector
             {
                 return;
             }
-            //if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+            //if (Input.GetKeyDown(KeyCode.Space) && isRope)
             //{
-            //    Jump();
+            //    if (isRope)
+            //    {
+            //        UpRope();
+            //    }
             //}
             if (Mathf.Abs(horizontal) > 0.1f)
             {
@@ -66,11 +70,7 @@ public class Player : Charector
             {
                 Throw();
             }
-        }
-        //if (isRope)
-        //{
-        //    UpRope();
-        //}
+        }        
         if (!isGrounded && rb.velocity.y > 0 && isRope == false)
         {
             ChangeAnim("jump");
@@ -94,6 +94,39 @@ public class Player : Charector
         }
         
         UIManager.instance.SetCoin(coin);
+        
+        if(base.hp < 100 && isAutoHealing == true)
+        {
+            isAutoHealing = false;
+            Invoke(nameof(AutoHealing),1f);
+        }
+        if (isRope && isPress)
+        {
+       
+        }
+        else if (isRope)
+        {
+           
+        }
+        if (isRope && isPress)
+        {
+            rb.gravityScale = 0;
+            transform.Translate(Vector3.up * speedRope * Time.deltaTime);
+        }
+    }
+    private bool isAutoHealing = true;
+    private void AutoHealing()
+    {
+        Debug.Log("hp++");
+        isAutoHealing = true;
+        base.hp += 5;
+    }
+    public void Healing()
+    {
+        if (base.hp < 100)
+        {
+            base.hp += 10;
+        }
     }
     private bool CheckGround()
     {
@@ -104,6 +137,7 @@ public class Player : Charector
     public override void OnInit()
     {
         base.OnInit();
+        Debug.Log(base.hp);
         //isDead = false;
         isAttack = false;
         transform.position = savePoint;
@@ -115,11 +149,13 @@ public class Player : Charector
     public override void OnDespawn()
     {
         base.OnDespawn();
+        OnInit();
     }
     protected override void OnDeath()
     {
         base.OnDeath();
-        OnInit();
+        Invoke(nameof(OnDespawn), 1);
+        //OnInit();
     }
     private bool isConditionAttack()
     {
@@ -137,13 +173,10 @@ public class Player : Charector
         Invoke(nameof(ResetAttack), 0.5f);        
         Invoke(nameof(DeActiceAttack), 0.5f);
     }
-    public void UpRope()
+    private bool isPress = false;
+    public void SetUpRope(bool isPress)
     {
-        
-        float vertical = Input.GetAxis("Vertical");
-        transform.Translate(Vector3.up * speedRope * Time.deltaTime);
-        //rb.velocity = new Vector2(rb.velocity.x, vertical * speedRope * Time.deltaTime);
-        //Debug.Log(isRope);
+        this.isPress = isPress;
     }
     public void Jump()
     {
@@ -153,11 +186,6 @@ public class Player : Charector
             ChangeAnim("jump");
             rb.AddForce(jumpForce * Vector2.up);
         }
-        if (isRope)
-        {
-            rb.gravityScale = 0;
-            UpRope();
-        }       
     }
     
     public void Throw()
@@ -173,7 +201,7 @@ public class Player : Charector
     }
     private void ResetAttack()
     {
-        ChangeAnim("idle");
+        //ChangeAnim("idle");
         isAttack = false;
     }
     public void SetMove(float horizontal)
@@ -219,6 +247,7 @@ public class Player : Charector
             transform.gameObject.transform.SetParent(null);
             isRope = false;
             rb.gravityScale = 1;
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y + 0.2f);
         }
         //Debug.Log(isRope);
     }

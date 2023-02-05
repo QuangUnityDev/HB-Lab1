@@ -37,6 +37,7 @@ public class Enemy : Charector
         {
             currentState.OnExcute(this);
         }
+        Debug.Log("Enemy" + base.hp);
     }
     public override void OnInit()
     {

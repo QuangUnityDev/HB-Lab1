@@ -27,6 +27,7 @@ public class HeathBar : MonoBehaviour
         this.maxHp = maxHp;
         hp = maxHp;
         imageFill.fillAmount = 1;
+        //Debug.Log(hp);
     }
     public void SetNewHp(float hp)
     {

@@ -7,7 +7,7 @@ public class Charector : MonoBehaviour
     [SerializeField] private Animator anim;
     [SerializeField] protected HeathBar heathBar;
     [SerializeField] protected CombatText combatTextPrefab;
-    private float hp;
+    protected float hp;
     private string currentAnimName;
     protected bool IsDead => hp <= 0;
     void Start()
@@ -16,21 +16,20 @@ public class Charector : MonoBehaviour
     }
     void Update()
     {
-        
+        heathBar.SetNewHp(hp);
     }
-    public virtual void OnInit()
+    public virtual void OnInit() // Khoi tao mau luc bat dau game
     {
         heathBar.OnInit(100, transform);
         hp = 100;
     }
     public virtual void OnDespawn()
     {
-
+        //OnInit();
     }
     protected virtual void OnDeath()
     {
         ChangeAnim("dead");
-        Invoke(nameof(OnDespawn), 2f);
     }
     protected void ChangeAnim(string animName)
     {
